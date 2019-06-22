@@ -1,4 +1,5 @@
 import { watchFile } from "fs";
+import { templateElement } from "@babel/types";
 //Define variables required for loading triples to Solid Pod 
 const $rdf = require("rdflib");
 const store = $rdf.graph();
@@ -9,7 +10,7 @@ var profile;
 //Holds the final sorted array
 var orderedArray = [];
 //Put your solid address here
-var solidAddress = "https://jacobmcconomy.solid.community/profile/card#";
+var solidAddress;
 
 //specifies what the root node is of the .nt file being read 
 //This is needed since the alogorithm requires knowing where to begin
@@ -23,10 +24,60 @@ async function fillOrderedArray(){
     me = store.sym(solidAddress);
     profile = me.doc();
     await fetcher.load(profile);
-    orderedArray = store.toString().split('\n');
+    orderedArray = store.toString().split('\n'); 
+}
 
-    
-    
+function ingestData(template, data) {
+    let ingestedData = '';
+    let lines = template.split('\n');
+    lines.forEach( (line, index) => {
+        let value = line.split(' ')[2];
+        switch(value) {
+            case '"last_name_value"':
+                line = line.replace('last_name_value', data.lastName);
+                ingestedData += line + '\n';
+                break;
+            case '"first_name_value"':
+                line = line.replace('first_name_value', data.firstName);
+                ingestedData += line + '\n';
+                break;
+            case '"county_value"':
+                line = line.replace('county_value', data.county);
+                ingestedData += line + '\n';
+                break;
+            case '"email_value"':
+                line = line.replace('email_value', data.email);
+                ingestedData += line + '\n';
+                break;
+            case '"phone_number_value"':
+                line = line.replace('phone_number_value', data.phoneNumber);
+                ingestedData += line + '\n';
+                break;
+            case '"street_address_value"':
+                line = line.replace('street_address_value', data.address);
+                ingestedData += line + '\n';
+                break;
+            case '"birthday_value"':
+                line = line.replace('birthday_value', data.birthday);
+                ingestedData += line + '\n';
+                break;
+            case '"zip_code_value"':
+                line = line.replace('zip_code_value', data.zipcode);
+                ingestedData += line + '\n';
+                break;
+            case '"city_value"':
+                line = line.replace('city_value', data.city);
+                ingestedData += line + '\n';
+                break;
+            case '"state_value"':
+                line = line.replace('state_value', data.state);
+                ingestedData += line + '\n';
+                break;
+            default:
+                ingestedData += line + '\n';
+        }
+    });
+    return ingestedData;
 }
 
 
@@ -146,8 +197,6 @@ function prependSolid(orderedArray) {
 
 
                 orderedArray[i] = tempArr.join(" ");
-
-
             }
 
             else {
@@ -290,8 +339,10 @@ function parseBranches(branches, initialFile, parents) {
             for (var j = 0; j < initialFile.length; j++) {
                 //We must perform two splits to isolate the subject value so we can match our branches object with the
                 //corresponding object
+                if( initialFile[j].length == 0){
+                    continue;
+                }
                 var split1 = initialFile[j].split(regExp1);
-
                 var split2 = split1[1].split(" ");
 
 
@@ -482,12 +533,16 @@ function parseNTFile(fileString, rootNode) {
 
 }
 
-export async function run(file) {
+export async function run(file, endpoint, state) {
+    solidAddress = endpoint;
+
     orderedArray.length = 0;
     await fetch(file)
         .then((r) => r.text())
         .then(text => {
-            parseNTFile(text, rootFileNode);
+            let data = ingestData(text,state);
+            console.log('text is ' + data);
+            parseNTFile(data, rootFileNode);
 
         })
 

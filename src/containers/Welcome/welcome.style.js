@@ -2,11 +2,17 @@ import styled from 'styled-components';
 import { media } from '../../utils';
 
 export const WelcomeWrapper = styled.section`
-  width: 100%;
-  background-image: url('/img/concentric-hex-pattern_2x.png');
-  background-repeat: repeat;
+  background-image: url('/img/background-brown-carpentry-326311.jpg');
+  overflow:scroll;
+  position:absolute;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
   padding: 50px 0;
-
+  width:100%;
+  height:100%;
+  align-items: center;
+  justify-content: center;
+  background-size:100% 100%;
   h3 {
     color: #666666;
     span {
@@ -64,7 +70,9 @@ export const WelcomeProfile = styled.div`
     border-radius: 50%;
   }
 
-  h1,
+  h1 {
+    color: #7c4dff;
+  },
   img {
     margin: 0 10px;
     display: inline-block;
@@ -78,8 +86,6 @@ export const WelcomeProfile = styled.div`
       content: "";
       position: absolute;
       height: 100%;
-      width: 1px;
-      background-color:#D0D0D0;
       top:0;
     }
   `}

@@ -1,9 +1,7 @@
 import React, { Component } from "react";
 import styled from "styled-components";
 import { Dropdown } from "@util-components";
-
 import auth from "solid-auth-client";
-
 
 export const ImageContainer = styled.div`
   width: 42px;
