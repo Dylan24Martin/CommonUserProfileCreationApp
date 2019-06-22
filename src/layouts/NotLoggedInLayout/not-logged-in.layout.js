@@ -9,7 +9,6 @@ const NotLoggedInLayout = ({ component: Component, webId, ...rest }) => {
       {...rest}
       render={matchProps => (
         <Fragment>
-          <NavBar {...matchProps} />
           <Component {...matchProps} />
         </Fragment>
       )}

@@ -28,7 +28,8 @@ export default class LoginComponent extends Component<Props, State> {
     return (
       <LoginWrapper>
         <CenterContainer>
-          <h1>Hi! Welcome to Solid.</h1>
+          <h1>Common User Profile</h1>
+          {/* <span>Your Universal Identity</span> */}
           <LoginPanel>
             <PanelBody>
               <Link
