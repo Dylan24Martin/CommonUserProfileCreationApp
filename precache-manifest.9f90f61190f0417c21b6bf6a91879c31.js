@@ -20,12 +20,12 @@ self.__precacheManifest = [
     "url": "/CommonUserProfileCreationApp/static/js/runtime~main.796d7805.js"
   },
   {
-    "revision": "24cce1809dd95a7d8ea413b3f14b883f",
-    "url": "/CommonUserProfileCreationApp/solid-auth-client.bundle.js"
-  },
-  {
     "revision": "4c94991edd28168444e591b57cca560c",
     "url": "/CommonUserProfileCreationApp/popup.html"
+  },
+  {
+    "revision": "24cce1809dd95a7d8ea413b3f14b883f",
+    "url": "/CommonUserProfileCreationApp/solid-auth-client.bundle.js"
   },
   {
     "revision": "5594b1146e1508857af5f134bd5a068a",
