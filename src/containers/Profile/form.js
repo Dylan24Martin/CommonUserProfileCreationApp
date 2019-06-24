@@ -1,6 +1,7 @@
 import React from "react";
 // import DateTimePicker from 'react-datetime-picker';
 // import DateTime from 'react-datetime';
+import Select from 'react-select';
 import './form.css';
 import { run } from '../../parse.js';
 import auth from "solid-auth-client";
@@ -12,6 +13,11 @@ export default class Form extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            selOptions: [
+                {value:'dab',label:'dab'},
+                {value:'on',label:'on'},
+                {value:'them',label:'them'}
+            ]
         };
         CUPurl = this.props.webid.replace('profile/card#me', '') + 'private/cup#';
 
@@ -110,6 +116,9 @@ export default class Form extends React.Component {
         return (
             <div className='mainDiv'>
                 <form onSubmit={this.handleSubmit}>
+                    {/* <div className='extensionSelectDiv' >
+                        <Select options={this.state.selOptions}/>
+                    </div> */}
                     <div>
                         <label>First Name:<input name="firstName" type='text' onChange={this.handleChange} /></label>
                         <label>Last Name:<input name="lastName" type='text' onChange={this.handleChange} /></label>

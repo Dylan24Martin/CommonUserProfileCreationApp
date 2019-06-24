@@ -16,7 +16,7 @@ Then start the server by running
 npm run start
 ```
 
-then dab on the haters cause you are done
+Finally navigate to http://localhost:3030 in your prefered web browser to get to the appllilcations home page. 
 
 ## Usage
 
