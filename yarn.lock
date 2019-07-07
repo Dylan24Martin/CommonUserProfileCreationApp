@@ -11534,7 +11534,7 @@ react-transition-group@^2.2.1, react-transition-group@^2.3.1:
     prop-types "^15.6.2"
     react-lifecycles-compat "^3.0.4"
 
-react@^16.2.0, react@^16.7.0:
+react@^16.2.0, react@^16.8.6:
   version "16.8.6"
   resolved "https://registry.yarnpkg.com/react/-/react-16.8.6.tgz#ad6c3a9614fd3a4e9ef51117f54d888da01f2bbe"
   integrity sha512-pC0uMkhLaHm11ZSJULfOBqV4tIZkx87ZLvbbQYunNixAAvjnC+snJCg0XQXn9VIsttVsbZP/H/ewzgsd5fxKXw==
@@ -12393,6 +12393,11 @@ solid-auth-client@^2.2.14, solid-auth-client@^2.2.3, solid-auth-client@^2.3.0:
     auth-header "^1.0.0"
     commander "^2.11.0"
     isomorphic-fetch "^2.2.1"
+
+solid-rdflib-tools@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/solid-rdflib-tools/-/solid-rdflib-tools-1.0.0.tgz#6bf91579faa8f44ae134b768c6db09f310d6cf9f"
+  integrity sha512-S+nLn2qYGo3WhiXy6o1clVhZAwfoKtfVVnpB0pOazT/G4+EBZVcKuUobRuWzuYepIei9hcRxn71xjT6RK6wrtA==
 
 sort-keys@^1.0.0:
   version "1.1.2"

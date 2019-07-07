@@ -5,6 +5,8 @@ import Select from 'react-select';
 import './form.css';
 import { run } from '../../parse.js';
 import auth from "solid-auth-client";
+// const tools = require('solid-rdflib-tools');
+// const lib = new tools();
 var CUPurl;
 const $rdf = require("rdflib");
 const store = $rdf.graph();
@@ -20,9 +22,64 @@ export default class Form extends React.Component {
             ]
         };
         CUPurl = this.props.webid.replace('profile/card#me', '') + 'private/cup#';
+        // CUPurl = this.props.webid;
 
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
+        this.ingestData = this.ingestData.bind(this);
+    }
+
+    ingestData(template, data) {
+        let ingestedData = '';
+        let lines = template.split('\n');
+        lines.forEach( (line, index) => {
+            let value = line.split(' ')[2];
+            switch(value) {
+                case '"last_name_value"':
+                    line = line.replace('last_name_value', data.lastName);
+                    ingestedData += line + '\n';
+                    break;
+                case '"first_name_value"':
+                    line = line.replace('first_name_value', data.firstName);
+                    ingestedData += line + '\n';
+                    break;
+                case '"county_value"':
+                    line = line.replace('county_value', data.county);
+                    ingestedData += line + '\n';
+                    break;
+                case '"email_value"':
+                    line = line.replace('email_value', data.email);
+                    ingestedData += line + '\n';
+                    break;
+                case '"phone_number_value"':
+                    line = line.replace('phone_number_value', data.phoneNumber);
+                    ingestedData += line + '\n';
+                    break;
+                case '"street_address_value"':
+                    line = line.replace('street_address_value', data.address);
+                    ingestedData += line + '\n';
+                    break;
+                case '"birthday_value"':
+                    line = line.replace('birthday_value', data.birthday);
+                    ingestedData += line + '\n';
+                    break;
+                case '"zip_code_value"':
+                    line = line.replace('zip_code_value', data.zipcode);
+                    ingestedData += line + '\n';
+                    break;
+                case '"city_value"':
+                    line = line.replace('city_value', data.city);
+                    ingestedData += line + '\n';
+                    break;
+                case '"state_value"':
+                    line = line.replace('state_value', data.state);
+                    ingestedData += line + '\n';
+                    break;
+                default:
+                    ingestedData += line + '\n';
+            }
+        });
+        return ingestedData;
     }
 
     handleChange(event) {
@@ -105,8 +162,16 @@ export default class Form extends React.Component {
             return;
         }
         console.log('A name was submitted: ' + JSON.stringify(this.state));
-
-        await run('../CUP.nt', CUPurl, this.state);
+        await fetch('./CUP.nt').then(
+            r => r.text()
+        ).then(
+            text => this.ingestData(text,this.state)
+        ).then(
+            text =>  {
+                console.log(text);
+                run(text, 'person', CUPurl)
+            }
+        )
         // let x = await deleteStore().then(console.log(x));
 
     }

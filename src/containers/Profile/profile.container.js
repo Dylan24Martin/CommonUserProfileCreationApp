@@ -47,7 +47,7 @@ const Profile = ({ toastManager }) => {
         <ProfileWrapper data-testid="profile-component">
             <ProfileContainer>
                 {webId && (
-                        <Form webid={webId} />
+                    <Form webid={webId} />
                 )}
             </ProfileContainer>
         </ProfileWrapper>
