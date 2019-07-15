@@ -21,8 +21,8 @@ export default class Form extends React.Component {
                 {value:'them',label:'them'}
             ]
         };
-        CUPurl = this.props.webid.replace('profile/card#me', '') + 'private/cup#';
-        // CUPurl = this.props.webid;
+        // CUPurl = this.props.webid.replace('profile/card#me', '') + 'private/cup#';
+        CUPurl = this.props.webid;
 
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);

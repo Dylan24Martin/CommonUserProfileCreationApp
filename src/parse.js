@@ -315,21 +315,12 @@ function parseBranches(branches, initialFile, parents) {
                         newBranches.push(initialFile[j]);
 
                         orderedArray.push(insertParent);
-
-
-
-
-
-
-
                     }
                     else if (initialFile[j].split("<").length == 2 && initialFile[j].split(regExp1).length == 2) {
 
                         //
                         // TODO: Remove IBE GUIDs 
                         //
-
-
 
                         var tempParentString = parents.join("/");
 
@@ -338,10 +329,6 @@ function parseBranches(branches, initialFile, parents) {
 
                         insertParent[1] = tempParentString + "/" + insertParent[1];
                         insertParent = insertParent.join(matchRegExp[0]);
-
-
-
-
                         orderedArray.push(insertParent);
 
                     }
