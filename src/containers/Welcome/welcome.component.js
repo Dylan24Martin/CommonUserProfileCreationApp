@@ -111,7 +111,12 @@ const WelcomePageContent = props => {
             <p>
               Contacts: Dylan Martin
               <br></br>
-              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Jacob McConomy
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              Jacob McConomy
+              <br></br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              J Reynolds
+
             </p>
             <p>
               Email: <a href='mailto:dylan.martin@polarisalpha.com' target='_blank' class='url'>
@@ -122,6 +127,13 @@ const WelcomePageContent = props => {
               <a href='mailto:jacob.w.mcconomy.civ@mail.mil' target='_blank' class='url'>
               jacob.w.mcconomy.civ@mail.mil
               </a>
+              <br></br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              <a href='mailto:jason.reynolds@polarisalpha.com' target='_blank' class='url'>
+                jason.reynolds@polarisalpha.com, 
+              </a>
+              <br></br>
+
             </p>
           </div>
         </WelcomeDetail>
