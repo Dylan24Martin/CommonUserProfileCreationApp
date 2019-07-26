@@ -1,11 +1,8 @@
 import React from "react";
-// import DateTimePicker from 'react-datetime-picker';
-// import DateTime from 'react-datetime';
 import './form.css';
 import { run } from '../../parse.js';
 import auth from "solid-auth-client";
-// const tools = require('solid-rdflib-tools');
-// const lib = new tools();
+
 var CUPurl;
 const $rdf = require("rdflib");
 const store = $rdf.graph();
@@ -14,14 +11,7 @@ var dataFromUserNT = "";
 export default class Form extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {
-            selOptions: [
-                {value:'dab',label:'dab'},
-                {value:'on',label:'on'},
-                {value:'them',label:'them'}
-            ]
-        };
-        // CUPurl = this.props.webid.replace('profile/card#me', '') + 'private/cup#';
+        this.state = {};
         CUPurl = this.props.webid;
 
         this.handleChange = this.handleChange.bind(this);
@@ -95,10 +85,10 @@ export default class Form extends React.Component {
         event.preventDefault();
         event.stopPropagation();
         let fetcher = new $rdf.Fetcher(store);
+
         // create cup file if not already exists
         try {
             await fetcher.load(CUPurl);
-            // console.log('it works');
         }
         catch (error) {
             console.log(error);
@@ -110,6 +100,7 @@ export default class Form extends React.Component {
                 .catch(error => console.log(error));
         }
         document.getElementById('error').innerHTML = '';
+
         // Make sure that the user is filling out all the fields
         if (document.getElementById("firstName").value === "") {
             let error = `Please enter a value for First Name`;
@@ -173,10 +164,39 @@ export default class Form extends React.Component {
                 run(text, 'person', CUPurl)
             }
         )
-        // let x = await deleteStore().then(console.log(x));
-
     }
 
+
+    birthdayCheck = (data) => {
+        return new Promise(resolve =>{
+            for (var i = 0; i < data.length; i++){
+                var dayEntity = "";
+                var dateID = "";
+                var IBE = "";
+                var birthDay = "";
+
+                if (data[i].includes("Birth") && data[i].includes("Day")) {
+                    dayEntity = data[i].split(">")[1].replace("_:cco_","");
+                    dayEntity = dayEntity.substring(1,dayEntity.length-3);
+                    console.log("dateEntity: " + dayEntity)
+                }
+                else if ( (dayEntity !== "") && (data[i].includes(dayEntity))  && (data[i].includes("DateIdentifier"))){
+                    dateID = data[i].split(">")[1].replace("_:cco_","").replace(" ","");
+                    console.log("dateID: " + dateID)
+                }
+                else if ((dateID !== "") && (data[i].includes(dateID)) && (data[i].includes("InformationBearingEntity"))){
+                    IBE = data[i].split(">")[1].replace("_:cco_","");
+                    console.log("IBE: " + IBE)
+                }
+                else if ((IBE !== "") && (data[i].includes(dateID)) && ((new RegExp('([0-9]*\/[0-9]*\/[0-9]*)+')).test(data[i]))){
+                    birthDay = data[i].split(">")[1].replace("_:cco_","");
+                    console.log(birthDay)
+                } 
+            }
+            
+            resolve(birthDay);
+        })
+    }
 
     pullOutDataFromNT = (data) =>{
         data = data.split("\n");
@@ -184,18 +204,20 @@ export default class Form extends React.Component {
             if ((data[i].includes("GivenNameBearingEntity")) && (data[i].includes("has_text_value"))){
                 var name = data[i].split("has_text_value>")[1];
                 name = name.substring(2,name.length-4);
-                // console.log(name)
                 document.getElementById("firstName").value = name;
                 this.setState({firstName:name})
             }
             else if ((data[i].includes("FamilyNameBearingEntity")) && (data[i].includes("has_text_value"))){
                 var name = data[i].split("has_text_value>")[1];
                 name = name.substring(2,name.length-4);
-                // console.log(name)
                 document.getElementById("lastName").value = name;
                 this.setState({lastName:name})
             }
-            
+            else if ( (data[i].includes("\"") ) && (new RegExp('([0-9]*\/[0-9]*\/[0-9]*)+')).test(data[i]))  {
+                var birthDay = data[i].split("\"")[1]
+                document.getElementById("birthday").value = birthDay;
+                this.setState({birthday:birthDay})
+            }
         }
     }
 
@@ -204,7 +226,7 @@ export default class Form extends React.Component {
         reader.readAsText(file);
         reader.onload = (e)=>{
             var data = reader.result;
-            // console.log(data);
+            console.log(data)
             this.pullOutDataFromNT(data)
         }
     }
@@ -218,16 +240,17 @@ export default class Form extends React.Component {
                     <b>Start with a .nt file?</b>
 
                     <form onSubmit={this.handleSubmitNt}>
-                        <p>If you have a properly formatted .nt file, upload it here with the file dialog.</p>
-                        <input type="file" id="fileElem" accept=".nt" onChange={e => {this.handleFileChosen(e.target.files[0])}}></input>                        
+                        <p>If you have a properly formatted .nt file from Facebook, upload it here with the file dialog.</p>
+                        <label class = "fileContainer">
+                        Upload
+                            <input type="file" id="fileElem" accept=".nt" onChange={e => {this.handleFileChosen(e.target.files[0])}} ></input>                        
+                        </label>
+                        <br/><br/><br/>
                     </form>
 
                 </div>
 
                 <form onSubmit={this.handleSubmit}>
-                    {/* <div className='extensionSelectDiv' >
-                        <Select options={this.state.selOptions}/>
-                    </div> */}
                     <br/><br/>
                     <b>Enter Data into the form.</b>
                     <br/><br/>
@@ -237,14 +260,15 @@ export default class Form extends React.Component {
                         <label>Address:<input name='address' type='text' onChange={this.handleChange} /></label>
                         <label>City:<input name='city' type='text' onChange={this.handleChange} /></label>
                         <label>State:<input name='state' type='text' onChange={this.handleChange} /></label>
-                        {/* <label>State: </label> <SelectUSState name='state' onChange={this.handleChange} /> */}
                         <label>County:<input name="county" type='text' onChange={this.handleChange} /></label>
                         <label>Zipcode:<input name='zipcode' type='text' onChange={this.handleChange} /></label>
                         <label>Email Address:<input name="email" type='text' onChange={this.handleChange} /></label>
                         <label>Phone Number:<input name="phoneNumber" type='text' onChange={this.handleChange} /></label>
-                        <label>Date of Birth:<input name="birthday" type='text' onChange={this.handleChange} /></label>
+                        <label>Date of Birth:<input id = "birthday" name="birthday" type='text' onChange={this.handleChange} /></label>
                     </div>
                 
+                    <br/><br/>
+
                     <div>
                         <input className='submitButton' type='submit'></input>
                     </div>
@@ -259,4 +283,3 @@ export default class Form extends React.Component {
         );
     }
 }
-
