@@ -138,6 +138,7 @@ class WelcomeComponent extends Component<Props> {
      */
     const user = data[this.props.webId];
     const nameLd = await user.name;
+    console.log("nameLD:" + nameLd)
 
     const name = nameLd ? nameLd.value : "";
 
@@ -153,11 +154,9 @@ class WelcomeComponent extends Component<Props> {
     // RG - 2019-04-12
     // url1 and url2 are individual profile data
     const url1 = "https://rganger.solid.community/profile/card#me";
-    const url2 = "https://jacobmcconomy.solid.community/profile/card#me";
 
     // RG - 2019-04-12
     // url3 is data that Jacob loaded into his public profile
-    const url3 = "https://jacobmcconomy.solid.community/public/JohnDoe.ttl";
 
     // RG - 2019-04-12
     // url4 is a subject in rganger's profile; this is updated by the app below
@@ -170,24 +169,7 @@ class WelcomeComponent extends Component<Props> {
     // RG - 2019-04-12
     // query strings are used to access data in the local store after it has been retrieved from solid
     const qryStr1 = "select * where { ?s ?p ?o . }";
-    const qryStr2 = `
-    PREFIX cco: <http://www.ontologyrepository.com/CommonCoreOntologies/>
-    select * where {
-      ?a a cco:Person .
-      ?a ?b ?c .
-    }
-    `;
-    const qryStr3 = `
-    PREFIX cco: <http://www.ontologyrepository.com/CommonCoreOntologies/>
-    PREFIX rdf:https://rdflib.readthedocs.io/en/4.2.2/namespaces_and_bindings.html
-    SELECT DISTINCT ?TextName
-    WHERE {
-      ?P rdf:type cco:Person ; cco:designated_by ?PFN .
-      ?PFN rdf:type cco:PersonFullName ; cco:inheres_in ?IBE .
-      ?IBE rdf:type cco:InformationBearingEntity ; cco:has_text_value ?TextName .
-    }
-    `;
-
+    
     // RG - 2019-04-12
     // This statement calls fundtions above to load data from solid
     // The resuls are added to the properties of this object so that they can be sent to the renderer

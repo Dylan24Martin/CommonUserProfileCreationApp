@@ -5,14 +5,14 @@ label {
 .mainDiv {
   position: 'relative';
   widows: 100%;
-  height: 80%;
+  height: 90%;
   overflow: visible;
   padding:30px;
   
   background-color: rgba(255,255,255,.5);  
 }
 
-form {
+form{
 }
 .submitButton {
     padding:20px;
@@ -123,4 +123,13 @@ form {
 
 .fileContainer:active{
   border-style: inset;
+}
+
+.pullButton{
+    width:20%;
+    padding:20px;
+     /* 68px 20px 68px; */
+    background-color: #7c4dff;
+    color: white;;
+    border-radius: 5px;
 }

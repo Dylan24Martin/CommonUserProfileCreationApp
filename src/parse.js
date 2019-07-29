@@ -1,5 +1,3 @@
-import { watchFile } from "fs";
-import { templateElement } from "@babel/types";
 //Define variables required for loading triples to Solid Pod 
 const $rdf = require("rdflib");
 const store = $rdf.graph();
@@ -31,7 +29,6 @@ async function fillOrderedArray(){
 export async function replaceTriple(oldTripleURL, newTripleURL){
     orderedArray.length = 0;
     
-    
     var oldSplit = oldTripleURL.split(">");
     var newSplit = newTripleURL.split(">");
     
@@ -62,14 +59,10 @@ export async function replaceTriple(oldTripleURL, newTripleURL){
         (uri, ok, message) => {
 
             if (ok)
-
                 accept();
             else
-
                 reject(message);
         }));
-   
-    
 }
 
 export async function deleteTriples(){
@@ -90,33 +83,29 @@ export async function deleteTriples(){
             (uri, ok, message) => {
 
                 if (ok)
-
                     accept();
                 else
-
                     reject(message);
             }));
-
-
     }
-    
 }
-
 
 
 function prependSolid(orderedArray) {
 
     for (var i = 0; i < orderedArray.length; i++) {
         //If it designating a child node
-        //console.log(orderedArray[i]);
+        // console.log(orderedArray[i]);
         var arrTest = orderedArray[i].split(" ");
         if (orderedArray[i].split("<").length == 2) {
 
             if (regExp1.test(arrTest[2])) {
                 var tempArr = orderedArray[i].split(" ");
+                
                 //prepend to subject node
                 tempArr[0] = tempArr[0].substring(6, tempArr[0].length);
                 tempArr[0] = "<" + solidAddress + tempArr[0] + ">";
+
                 //prepend to object node
                 tempArr[2] = tempArr[2].substring(6, tempArr[2].length);
                 tempArr[2] = "<" + solidAddress + tempArr[2] + ">";
@@ -131,19 +120,14 @@ function prependSolid(orderedArray) {
                 var insertstatements = store.match(null, null, null, profile);
                 
                 new Promise((accept, reject) => updater.update(currentstatements, insertstatements,
-                    (uri, ok, message) => {
+                    (ok, message) => {
 
-                        if (ok)
-
-                            accept();
-                        else
-
-                            reject(message);
+                        if (ok) accept();
+                        else reject(message);
                     }));
-
-
-
+                
                 orderedArray[i] = tempArr.join(" ");
+                console.log(orderedArray[i])
             }
 
             else {
@@ -156,14 +140,11 @@ function prependSolid(orderedArray) {
                     var len = tempArr.length - 1;
                     for (var j = 3; j < len; j++) {
                         tempArr[2] = tempArr[2] + " " + tempArr[j];
-
-
                     }
 
                     tempArr[0] = tempArr[0].substring(6, tempArr[0].length);
                     tempArr[0] = "<" + solidAddress + tempArr[0] + ">";
-                    tempArr[2] = tempArr[2].substring(1, tempArr[2].length - 1);
-                   
+                    tempArr[2] = tempArr[2].substring(1, tempArr[2].length - 1);                   
 
                     //upload to solid pod
                     me = store.sym(tempArr[0].substring(1, tempArr[0].length - 1));
@@ -179,17 +160,13 @@ function prependSolid(orderedArray) {
                         (uri, ok, message) => {
 
                             if (ok)
-
                                 accept();
                             else
-
                                 reject(message);
                         }));
 
-
                     orderedArray[i] = tempArr[0] + " " + tempArr[1] + " " + tempArr[2];
-
-
+                    console.log(orderedArray[i])
                 }
                 else {
 
@@ -209,28 +186,21 @@ function prependSolid(orderedArray) {
                         (uri, ok, message) => {
 
                             if (ok)
-
                                 accept();
                             else
-
                                 reject(message);
                         }));
 
-
                     orderedArray[i] = tempArr.join(" ");
-
+                    console.log(orderedArray[i])
                 }
-
             }
-
-
         }
+
         //Else it is a node definition
         else {
             var tempArr = orderedArray[i].split(" ");
-
             tempArr[0] = tempArr[0].substring(6, tempArr[0].length);
-
 
             //prepend to subject node
             tempArr[0] = "<" + solidAddress + tempArr[0] + ">";
@@ -247,17 +217,13 @@ function prependSolid(orderedArray) {
                 (uri, ok, message) => {
 
                     if (ok)
-
                         accept();
                     else
-
                         reject(message);
                 }));
 
-
             orderedArray[i] = tempArr.join(" ");
-
-
+            console.log(orderedArray[i])
         }
     }
 }
@@ -273,14 +239,13 @@ function parseBranches(branches, initialFile, parents) {
         var newBranches = [];
         var branchNode = branches[i].split(regExp2);
         //Array holds subject to be extracted and kept track of along the recursive function
-        var previousBranches = [];
+    
         var subject = branches[i].split(" ");
+
         if (!parents.includes(subject[0].substring(6, subject[0].length))) {
             parents.push(subject[0].substring(6, subject[0].length));
-
         }
         //parents.push(subject[0].substring(6,subject[0].length));
-
 
         if (branchNode.length == 3) {
             for (var j = 0; j < initialFile.length; j++) {
@@ -291,7 +256,6 @@ function parseBranches(branches, initialFile, parents) {
                 }
                 var split1 = initialFile[j].split(regExp1);
                 var split2 = split1[1].split(" ");
-
 
                 if (split2[0].toLowerCase() == branchNode[2].toLowerCase().substring(0, branchNode[2].length - 2) && initialFile[j] != branches[i]) {
                     if (initialFile[j].split("<").length == 2 && initialFile[j].split(regExp1).length == 3) {
@@ -308,8 +272,6 @@ function parseBranches(branches, initialFile, parents) {
                         insertParent[1] = tempParentString + "/" + insertParent[1];
                         insertParent[2] = tempParentString + "/" + getChildString[0] + "/" + insertParent[2];
                         insertParent = insertParent.join(matchRegExp[0]);
-
-
 
                         //This is the node that defines its children are, this is tracked by newBranches
                         newBranches.push(initialFile[j]);
@@ -346,17 +308,10 @@ function parseBranches(branches, initialFile, parents) {
                         insertParent[1] = tempParentString + "/" + insertParent[1];
                         insertParent = insertParent.join(matchRegExp[0]);
 
-
                         //This is the type identifier node, this can be immediately added to ordered array
                         orderedArray.push(insertParent);
-
-
                     }
-
-
-
                 }
-
             }
         }
         //Base case for recursive function, it means the recursion has reached the end node of the branch
@@ -369,17 +324,9 @@ function parseBranches(branches, initialFile, parents) {
             //Else you haven't hit the end, keep going!
             parseBranches(newBranches.slice(), initialFile, parents.slice(0));
 
-
         }
-
     }
-
-
-
-
 }
-
-
 
 function parseNTFile(fileString, rootNode) {
     
@@ -389,7 +336,6 @@ function parseNTFile(fileString, rootNode) {
     var fileArray = fileString.split(/\r?\n/);
     var fileLineNum = fileArray.length;
 
-
     var countRoot = 0;
     //Holds all triples that contain the root keyword (such as "person")
     var rootArray = [];
@@ -398,11 +344,9 @@ function parseNTFile(fileString, rootNode) {
     //holds the branches that are to be created off the initial root node
     var rootBranches = [];
 
-
-
-
     console.log("Given file is " + fileArray.length + " lines long");
     //find and counts all root
+
     for (var i = 0; i < fileLineNum; i++) {
         if (fileArray[i].toLowerCase().includes(rootNode)) {
             countRoot++;
@@ -419,7 +363,6 @@ function parseNTFile(fileString, rootNode) {
             rootTriple = rootArray[i];
 
             orderedArray.push(rootTriple);
-
 
         }
         //Finds a branch off of the root node
@@ -442,12 +385,7 @@ function parseNTFile(fileString, rootNode) {
         temp[2] = subject[0] + "/" + temp[2];
         var tempRootBranches = temp.join(matchRegExp[0]);
 
-
         orderedArray.push(tempRootBranches);
-
-
-
-
     }
 
     //initate recursive function given the initial root node and its children
@@ -456,15 +394,13 @@ function parseNTFile(fileString, rootNode) {
     //Completed ordering, tracked by the array "orderedArray"
     console.log("Done...");
     console.log("The complete parsed .nt file is " + orderedArray.length + " lines long");
-
+    
     //Prep for uploading to solid
     prependSolid(orderedArray);
     // for(var i = 0; i < orderedArray.length; i++){
     //     console.log(orderedArray[i]);
     // }
     
-    
-
 }
 
 export async function run(file, rootNode, endpoint) {
@@ -473,7 +409,5 @@ export async function run(file, rootNode, endpoint) {
     orderedArray.length = 0;
     parseNTFile(file, rootFileNode);
 
-
     return orderedArray;
-
 }

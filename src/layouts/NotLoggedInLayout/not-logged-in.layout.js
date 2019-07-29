@@ -1,6 +1,5 @@
 import React, { Fragment } from "react";
 import { Route, Redirect } from "react-router-dom";
-import { NavBar } from "@components";
 import { withWebId } from "@inrupt/solid-react-components";
 
 const NotLoggedInLayout = ({ component: Component, webId, ...rest }) => {

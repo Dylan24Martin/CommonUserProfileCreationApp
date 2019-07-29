@@ -27,9 +27,9 @@ export const ProfileContainer = styled.div`
     position:relative;
     border-radius:10px;
     width:100%;
-    overflow-y: scroll;
+    overflow-y: auto;
     ${media.tablet`
-    height: 80%;
+    height: 65em;;
   `}
 `;
 

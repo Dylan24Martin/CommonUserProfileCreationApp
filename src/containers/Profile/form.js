@@ -2,11 +2,15 @@ import React from "react";
 import './form.css';
 import { run } from '../../parse.js';
 import auth from "solid-auth-client";
+import data from "@solid/query-ldflex";
+
 
 var CUPurl;
 const $rdf = require("rdflib");
 const store = $rdf.graph();
+
 var dataFromUserNT = "";
+
 
 export default class Form extends React.Component {
     constructor(props) {
@@ -19,10 +23,11 @@ export default class Form extends React.Component {
         this.ingestData = this.ingestData.bind(this);
     }
 
+
     ingestData(template, data) {
         let ingestedData = '';
         let lines = template.split('\n');
-        lines.forEach( (line, index) => {
+        lines.forEach( (line) => {
             let value = line.split(' ')[2];
             switch(value) {
                 case '"last_name_value"':
@@ -166,7 +171,6 @@ export default class Form extends React.Component {
         )
     }
 
-
     birthdayCheck = (data) => {
         return new Promise(resolve =>{
             for (var i = 0; i < data.length; i++){
@@ -188,7 +192,7 @@ export default class Form extends React.Component {
                     IBE = data[i].split(">")[1].replace("_:cco_","");
                     console.log("IBE: " + IBE)
                 }
-                else if ((IBE !== "") && (data[i].includes(dateID)) && ((new RegExp('([0-9]*\/[0-9]*\/[0-9]*)+')).test(data[i]))){
+                else if ((IBE !== "") && (data[i].includes(dateID)) && ((new RegExp('([0-9]*/[0-9]*/[0-9]*)+')).test(data[i]))){
                     birthDay = data[i].split(">")[1].replace("_:cco_","");
                     console.log(birthDay)
                 } 
@@ -200,21 +204,24 @@ export default class Form extends React.Component {
 
     pullOutDataFromNT = (data) =>{
         data = data.split("\n");
+        var name;
+        var birthDay;
+
         for (var i = 0;i < data.length;i++){
             if ((data[i].includes("GivenNameBearingEntity")) && (data[i].includes("has_text_value"))){
-                var name = data[i].split("has_text_value>")[1];
+                name = data[i].split("has_text_value>")[1];
                 name = name.substring(2,name.length-4);
                 document.getElementById("firstName").value = name;
                 this.setState({firstName:name})
             }
             else if ((data[i].includes("FamilyNameBearingEntity")) && (data[i].includes("has_text_value"))){
-                var name = data[i].split("has_text_value>")[1];
+                name = data[i].split("has_text_value>")[1];
                 name = name.substring(2,name.length-4);
                 document.getElementById("lastName").value = name;
                 this.setState({lastName:name})
             }
-            else if ( (data[i].includes("\"") ) && (new RegExp('([0-9]*\/[0-9]*\/[0-9]*)+')).test(data[i]))  {
-                var birthDay = data[i].split("\"")[1]
+            else if ( (data[i].includes("\"") ) && (new RegExp('([0-9]*/[0-9]*/[0-9]*)+')).test(data[i]))  {
+                birthDay = data[i].split("\"")[1]
                 document.getElementById("birthday").value = birthDay;
                 this.setState({birthday:birthDay})
             }
@@ -231,17 +238,76 @@ export default class Form extends React.Component {
         }
     }
 
+    handlePullFromCard = async (webId)=>{
+        var user = data[webId];
+        
+        var name = await user.name;
+        name = name.toString();
+        var firstName;
+        var lastName;
+        
+        if (name.includes(" ")){
+            var nameArr = name.split(" ");
+
+            firstName = nameArr[0];
+            lastName = nameArr[1];
+            document.getElementById("firstName").value = firstName;
+            document.getElementById("lastName").value = lastName;
+        }
+        else{
+            document.getElementById("firstName").value = name;
+        }
+
+        
+        const email = await user.vcard_hasEmail.vcard_value;        
+        if (email !== undefined){
+            document.getElementById("email").value = email;
+        }
+
+        const city = await user.vcard_hasAddress.vcard_locality;
+        if (city !== undefined){
+            document.getElementById("city").value = city;
+        }
+
+        const zipCode = await user.vcard_hasAddress["vcard:postal-code"];
+        if (zipCode !== undefined){
+            document.getElementById("zipcode").value = zipCode;
+        }
+
+        const street = await user.vcard_hasAddress["vcard:street-address"];
+        if (street !== undefined){
+            document.getElementById("address").value = street;
+        }
+
+        const state = await user.vcard_hasAddress.vcard_region;
+        if (state !== undefined){
+            document.getElementById("state").value = state;
+        }        
+        
+        const phone = await user.vcard_hasTelephone.vcard_value;
+        if (phone !== undefined){
+            document.getElementById("phoneNumber").value = phone;
+        }
+    }
+
     render() {
        
         return (
-            <div className='mainDiv'>
+            <div className ='mainDiv'>
 
-                <div id="upload-area">
+                <div id="card-upload-area">
+                    <b>Use data from your Card?</b>
+                    <p>If you have already put your information into your Solid Card and would like to pull from that information, use this option.</p>
+                        <input className ='pullButton' type='button' value="Pull" onClick={e=>{this.handlePullFromCard(this.props.webid)}}></input>
+                    <br/><br/><br/>
+                </div>
+
+                <div id="fb-upload-area">
                     <b>Start with a .nt file?</b>
 
                     <form onSubmit={this.handleSubmitNt}>
                         <p>If you have a properly formatted .nt file from Facebook, upload it here with the file dialog.</p>
-                        <label class = "fileContainer">
+                        <label className = "fileContainer">
                         Upload
                             <input type="file" id="fileElem" accept=".nt" onChange={e => {this.handleFileChosen(e.target.files[0])}} ></input>                        
                         </label>
@@ -257,20 +323,20 @@ export default class Form extends React.Component {
                     <div>
                         <label>First Name:<input id = "firstName" name="firstName" type='text' onChange={this.handleChange} /></label>
                         <label>Last Name:<input id = "lastName" name="lastName" type='text' onChange={this.handleChange} /></label>
-                        <label>Address:<input name='address' type='text' onChange={this.handleChange} /></label>
-                        <label>City:<input name='city' type='text' onChange={this.handleChange} /></label>
-                        <label>State:<input name='state' type='text' onChange={this.handleChange} /></label>
-                        <label>County:<input name="county" type='text' onChange={this.handleChange} /></label>
-                        <label>Zipcode:<input name='zipcode' type='text' onChange={this.handleChange} /></label>
-                        <label>Email Address:<input name="email" type='text' onChange={this.handleChange} /></label>
-                        <label>Phone Number:<input name="phoneNumber" type='text' onChange={this.handleChange} /></label>
+                        <label>Address:<input id = "address" name='address' type='text' onChange={this.handleChange} /></label>
+                        <label>City:<input id = "city" name='city' type='text' onChange={this.handleChange} /></label>
+                        <label>State:<input id = "state" name='state' type='text' onChange={this.handleChange} /></label>
+                        <label>County:<input id = "county" name="county" type='text' onChange={this.handleChange} /></label>
+                        <label>Zipcode:<input id = "zipcode" name='zipcode' type='text' onChange={this.handleChange} /></label>
+                        <label>Email Address:<input id = "email" name="email" type='text' onChange={this.handleChange} /></label>
+                        <label>Phone Number:<input id = "phoneNumber" name="phoneNumber" type='text' onChange={this.handleChange} /></label>
                         <label>Date of Birth:<input id = "birthday" name="birthday" type='text' onChange={this.handleChange} /></label>
                     </div>
                 
                     <br/><br/>
 
                     <div>
-                        <input className='submitButton' type='submit'></input>
+                        <input className ='submitButton' type='submit'></input>
                     </div>
                 
                 </form>

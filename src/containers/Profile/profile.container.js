@@ -1,18 +1,11 @@
-import React, { Fragment } from 'react';
-import { useTranslation } from 'react-i18next';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import React from 'react';
 import { withToastManager } from 'react-toast-notifications';
-import { useWebId, ShexFormBuilder } from '@inrupt/solid-react-components';
+import { useWebId} from '@inrupt/solid-react-components';
 import {
-    Header,
     ProfileContainer,
     ProfileWrapper,
-    ShexForm,
-    DeleteNotification,
-    WebId,
 } from './profile.style';
 import Form from './form.js';
-const defaultProfilePhoto = '/img/icon/empty-profile.svg';
 
 /**
  * We are using ldflex to fetch profile data from a solid pod.
@@ -22,26 +15,8 @@ const defaultProfilePhoto = '/img/icon/empty-profile.svg';
  * for more information please go to: https://github.com/solid/query-ldflex
  */
 
-const Profile = ({ toastManager }) => {
+const Profile = () => {
     const webId = useWebId();
-    const { t, i18n } = useTranslation();
-
-    const successCallback = () => {
-        toastManager.add(['Success', t('profile.successCallback')], {
-            appearance: 'success',
-        });
-    };
-
-    const errorCallback = e => {
-        const code = e.code || e.status;
-        const messageError = code
-            ? `profile.errors.${code}`
-            : `profile.errors.default`;
-        if (code && code !== 200)
-            toastManager.add(['Error', t(messageError)], {
-                appearance: 'error',
-            });
-    };
 
     return (
         <ProfileWrapper data-testid="profile-component">
