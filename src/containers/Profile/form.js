@@ -253,41 +253,52 @@ export default class Form extends React.Component {
             lastName = nameArr[1];
             document.getElementById("firstName").value = firstName;
             document.getElementById("lastName").value = lastName;
+            this.setState({firstName:firstName})
+            this.setState({lastName:lastName})
         }
         else{
             document.getElementById("firstName").value = name;
         }
-
         
         const email = await user.vcard_hasEmail.vcard_value;        
         if (email !== undefined){
             document.getElementById("email").value = email;
+            this.setState({email:email.toString()})
         }
 
         const city = await user.vcard_hasAddress.vcard_locality;
         if (city !== undefined){
             document.getElementById("city").value = city;
+            this.setState({city:city.toString()})
         }
 
         const zipCode = await user.vcard_hasAddress["vcard:postal-code"];
         if (zipCode !== undefined){
             document.getElementById("zipcode").value = zipCode;
+            this.setState({zipcode:zipCode.toString()})
         }
 
         const street = await user.vcard_hasAddress["vcard:street-address"];
         if (street !== undefined){
             document.getElementById("address").value = street;
+            this.setState({address:street.toString()})
         }
 
         const state = await user.vcard_hasAddress.vcard_region;
         if (state !== undefined){
             document.getElementById("state").value = state;
+            this.setState({state:state.toString()})
         }        
         
-        const phone = await user.vcard_hasTelephone.vcard_value;
+        var phone = await user.vcard_hasTelephone.vcard_value;
         if (phone !== undefined){
+            phone = phone.toString().split(":")
+            phone = phone[1]
             document.getElementById("phoneNumber").value = phone;
+            this.setState({phoneNumber:phone})
         }
+
+        console.log(this.state)
     }
 
     render() {
