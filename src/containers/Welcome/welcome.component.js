@@ -49,7 +49,7 @@ const WelcomePageContent = props => {
       <WelcomeCard className="card">
         <WelcomeProfile>
           <h1>
-            Comon User Profile Creation
+            CardX Creation
           </h1>
           <h3>
             Welcome, <span>{props.name}</span>
@@ -69,10 +69,10 @@ const WelcomePageContent = props => {
           <div id='write' className='is-mac'>
             <h1>
               <a name='header-n26' className='md-header-anchor '></a>
-              Common User Profile
+              CardX
             </h1>
             <p>
-              The common user profile is a standardized user profile using linked data and the <a href='https://github.com/CommonCoreOntology/CommonCoreOntologies' target="_blank">common core ontology</a>. The purpose of the common user profile is to create a user owned profile that embodies attributes of the users everyday life and allow applications with the appropriate permissions to access that data, allowing user data to be shared by multiple apps.
+              The CardX is a standardized user profile using linked data and the <a href='https://github.com/CommonCoreOntology/CommonCoreOntologies' target="_blank">common core ontology</a>. The purpose of the common user profile is to create a user owned profile that embodies attributes of the users everyday life and allow applications with the appropriate permissions to access that data, allowing user data to be shared by multiple apps.
             </p>
             <p>
               Contacts: Dylan Martin

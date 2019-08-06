@@ -17,6 +17,8 @@ var regExp1 = new RegExp(/_:\w\w\w_/);
 var regExp2 = new RegExp(/:\w\w\w_/);
 var matchRegExp = "";
 
+const personLink = ``
+
 async function fillOrderedArray(){
     orderedArray.length = 0;
     me = store.sym(solidAddress);
@@ -97,9 +99,10 @@ function prependSolid(orderedArray) {
         //If it designating a child node
         // console.log(orderedArray[i]);
         var arrTest = orderedArray[i].split(" ");
-        if (orderedArray[i].split("<").length == 2) {
+        if (orderedArray[i].split("<").length === 2) {
 
             if (regExp1.test(arrTest[2])) {
+                console.log('smac?')
                 var tempArr = orderedArray[i].split(" ");
                 
                 //prepend to subject node
@@ -111,11 +114,12 @@ function prependSolid(orderedArray) {
                 tempArr[2] = "<" + solidAddress + tempArr[2] + ">";
 
                 //upload to solid pod
-                me = store.sym(tempArr[0].substring(1, tempArr[0].length - 1));
+                me = store.sym(tempArr[0].substring(1, tempArr[0].length - 1).replace('Person1',""));
                 profile = me.doc();
-
+                console.log(me);
                 var currentstatements = store.match(null, null, null, profile);
-                store.add(me, store.sym(tempArr[1].substring(1, tempArr[1].length - 1)), store.sym(tempArr[2].substring(1, tempArr[2].length - 1)), profile);
+            
+                store.add(me, store.sym(tempArr[1].substring(1, tempArr[1].length - 1)), store.sym(tempArr[2].substring(1, tempArr[2].length - 1).replace('Person1',"")), profile);
                 
                 var insertstatements = store.match(null, null, null, profile);
                 
@@ -131,6 +135,7 @@ function prependSolid(orderedArray) {
             }
 
             else {
+                console.log('sub')
                 //prepend to subject node, leave object alone since it contains a value (like "DOE")
 
                 var tempArr = orderedArray[i].split(" ");
@@ -147,7 +152,7 @@ function prependSolid(orderedArray) {
                     tempArr[2] = tempArr[2].substring(1, tempArr[2].length - 1);                   
 
                     //upload to solid pod
-                    me = store.sym(tempArr[0].substring(1, tempArr[0].length - 1));
+                    me = store.sym(tempArr[0].substring(1, tempArr[0].length - 1).replace('Person1',""));
                     profile = me.doc();
 
                     var currentstatements = store.match(null, null, null, profile);
@@ -169,13 +174,14 @@ function prependSolid(orderedArray) {
                     console.log(orderedArray[i])
                 }
                 else {
+                    console.log('that other else')
 
                     tempArr[0] = tempArr[0].substring(6, tempArr[0].length);
                     tempArr[0] = "<" + solidAddress + tempArr[0] + ">";
                     tempArr[2] = tempArr[2].substring(1, tempArr[2].length - 1);
 
                     //upload to solid pod
-                    me = store.sym(tempArr[0].substring(1, tempArr[0].length - 1));
+                    me = store.sym(tempArr[0].substring(1, tempArr[0].length - 1).replace('Person1',""));
                     profile = me.doc();
 
                     var currentstatements = store.match(null, null, null, profile);
@@ -199,6 +205,7 @@ function prependSolid(orderedArray) {
 
         //Else it is a node definition
         else {
+            console.log('def')
             var tempArr = orderedArray[i].split(" ");
             tempArr[0] = tempArr[0].substring(6, tempArr[0].length);
 
@@ -206,11 +213,11 @@ function prependSolid(orderedArray) {
             tempArr[0] = "<" + solidAddress + tempArr[0] + ">";
 
             //upload to solid pod
-            me = store.sym(tempArr[0].substring(1, tempArr[0].length - 1));
+            me = store.sym(tempArr[0].substring(1, tempArr[0].length - 1).replace('Person1',""));
             profile = me.doc();
 
             var currentstatements = store.match(null, null, null, profile);
-            store.add(me, store.sym(tempArr[1].substring(1, tempArr[1].length - 1)), store.sym(tempArr[2].substring(1, tempArr[2].length - 1)), profile);
+            store.add(me, store.sym(tempArr[1].substring(1, tempArr[1].length - 1)), store.sym(tempArr[2].substring(1, tempArr[2].length - 1).replace('Person1',"")), profile);
             var insertstatements = store.match(null, null, null, profile);
             
             new Promise((accept, reject) => updater.update(currentstatements, insertstatements,
@@ -317,7 +324,7 @@ function parseBranches(branches, initialFile, parents) {
         //Base case for recursive function, it means the recursion has reached the end node of the branch
         if (newBranches.length == 0) {
             //END OF RECURSION, nothing else needed to do
-
+            console.log(parents);
         }
 
         else {

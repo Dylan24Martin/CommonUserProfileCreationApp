@@ -188,7 +188,7 @@ export default class Form extends React.Component {
                     dateID = data[i].split(">")[1].replace("_:cco_","").replace(" ","");
                     console.log("dateID: " + dateID)
                 }
-                else if ((dateID !== "") && (data[i].includes(dateID)) && (data[i].includes("InformationBearingEntity"))){
+                else if ((dateID !==  "") && (data[i].includes(dateID)) && (data[i].includes("InformationBearingEntity"))){
                     IBE = data[i].split(">")[1].replace("_:cco_","");
                     console.log("IBE: " + IBE)
                 }

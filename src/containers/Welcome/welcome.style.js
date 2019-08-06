@@ -72,6 +72,7 @@ export const WelcomeProfile = styled.div`
 
   h1 {
     color: #7c4dff;
+    font-size: 500%;
   },
   img {
     margin: 0 10px;
