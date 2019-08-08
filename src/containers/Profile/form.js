@@ -305,28 +305,34 @@ export default class Form extends React.Component {
        
         return (
             <div className ='mainDiv'>
-
-                <div id="card-upload-area">
-                    <b>Use data from your Card?</b>
-                    <p>If you have already put your information into your Solid Card and would like to pull from that information, use this option.</p>
-                        <input className ='pullButton' type='button' value="Pull" onClick={e=>{this.handlePullFromCard(this.props.webid)}}></input>
-                    <br/><br/><br/>
-                </div>
-
-                <div id="fb-upload-area">
-                    <b>Start with a .nt file?</b>
-
-                    <form onSubmit={this.handleSubmitNt}>
-                        <p>If you have a properly formatted .nt file from Facebook, upload it here with the file dialog.</p>
-                        <label className = "fileContainer">
-                        Upload
-                            <input type="file" id="fileElem" accept=".nt" onChange={e => {this.handleFileChosen(e.target.files[0])}} ></input>                        
-                        </label>
+                <div style={{display:'flex',flexDirection:'row'}}>
+                <div style={{width:'50%'}}>
+                    <div id="card-upload-area">
+                        <b>Use data from your Card?</b>
+                        <p>If you have already put your information into your Solid Card and would like to pull from that information, use this option.</p>
+                            <input className ='pullButton' type='button' value="Pull" onClick={e=>{this.handlePullFromCard(this.props.webid)}}></input>
                         <br/><br/><br/>
-                    </form>
+                    </div>
 
+                    <div id="fb-upload-area">
+                        <b>Start with a .nt file?</b>
+
+                        <form onSubmit={this.handleSubmitNt}>
+                            <p>If you have a properly formatted .nt file from Facebook, upload it here with the file dialog.</p>
+                            <label className = "fileContainer">
+                            Upload
+                                <input type="file" id="fileElem" accept=".nt" onChange={e => {this.handleFileChosen(e.target.files[0])}} ></input>                        
+                            </label>
+                            <br/><br/><br/>
+                        </form>
+
+                    </div>
                 </div>
-
+                <div style={{width:'50%'}}>
+                    {/* seth put drop down menu here */}
+                    oh shit fuck darn
+                </div>
+                </div>
                 <form onSubmit={this.handleSubmit}>
                     <br/><br/>
                     <b>Enter Data into the form.</b>

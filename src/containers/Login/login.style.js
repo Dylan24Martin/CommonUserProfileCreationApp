@@ -2,17 +2,13 @@ import styled from "styled-components";
 import { GradientBackground, Panel } from "@util-components";
 
 export const LoginWrapper = styled.div`
-background-image: url('/img/background-brown-carpentry-326311.jpg');
 overflow:scroll;
 position:absolute;
-background-repeat: no-repeat;
-background-attachment: fixed;
 padding: 50px 0;
 width:100%;
 height:100%;
 align-items: center;
 justify-content: center;
-background-size:100% 100%;
   h1 {
     color: #ffffff;
     // font-size:50px

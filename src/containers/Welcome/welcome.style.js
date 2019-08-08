@@ -2,17 +2,13 @@ import styled from 'styled-components';
 import { media } from '../../utils';
 
 export const WelcomeWrapper = styled.section`
-  background-image: url('/img/background-brown-carpentry-326311.jpg');
-  overflow:scroll;
+  overflow:auto;
   position:absolute;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
   padding: 50px 0;
   width:100%;
   height:100%;
   align-items: center;
   justify-content: center;
-  background-size:100% 100%;
   h3 {
     color: #666666;
     span {

@@ -10,10 +10,6 @@ export const ProfileWrapper = styled.section`
     display: flex;
     align-items: center;
     justify-content: center;
-    background-image: url('/img/background-brown-carpentry-326311.jpg');
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-    background-size:100% 100%;
     min-height: 79vh;
     padding: 60px 0;
     margin: 0;
