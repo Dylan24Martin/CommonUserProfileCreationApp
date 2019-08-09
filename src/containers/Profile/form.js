@@ -3,11 +3,13 @@ import './form.css';
 import { run } from '../../parse.js';
 import auth from "solid-auth-client";
 import data from "@solid/query-ldflex";
+import { fstat } from "fs";
 
 
 var CUPurl;
 const $rdf = require("rdflib");
 const store = $rdf.graph();
+const fs = require('fs');
 
 var dataFromUserNT = "";
 
@@ -24,6 +26,18 @@ export default class Form extends React.Component {
         this.handleSubmit = this.handleSubmit.bind(this);
         this.ingestData = this.ingestData.bind(this);
         this.populateForm = this.populateForm.bind(this);
+    }
+
+    componentDidMount() {
+        var extentions = './Extentions';
+        fs.readdir(extentions, (err, file) => {
+
+            for(var i = 0; i<file.length;i++){
+                console.log(file[i]);
+            }
+            this.setState({files:file})
+        })
+
     }
 
 
@@ -315,7 +329,7 @@ export default class Form extends React.Component {
 
 
     render() {
-       
+        console.log(this.state);
         return (
             <div className ='mainDiv'>
                 <div style={{display:'flex',flexDirection:'row'}}>
@@ -342,8 +356,14 @@ export default class Form extends React.Component {
                     </div>
                 </div>
                 <div style={{width:'50%'}}>
-                    {/* seth put drop down menu here */}
-                    oh shit fuck darn
+                    <div class="dropdown">
+                        <button class="dropbtn">Add to Form</button>
+                        <div class="dropdown-content">
+                            <a href="#">Favorite Food</a>
+                            <a href="#">Favorite Places to Shop</a>
+                            <a href="#">add more...</a>
+                        </div>
+                    </div>
                 </div>
                 </div>
                 <form onSubmit={this.handleSubmit}>
