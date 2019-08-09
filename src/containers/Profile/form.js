@@ -15,12 +15,15 @@ var dataFromUserNT = "";
 export default class Form extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {};
+        this.state = {
+            selectedNtFle: 'CUP.nt'
+        };
         CUPurl = this.props.webid;
 
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
         this.ingestData = this.ingestData.bind(this);
+        this.populateForm = this.populateForm.bind(this);
     }
 
 
@@ -158,7 +161,7 @@ export default class Form extends React.Component {
             return;
         }
         console.log('A name was submitted: ' + JSON.stringify(this.state));
-        await fetch('./CUP.nt').then(
+        await fetch('./Extensions/' + this.state.selectedNtFle).then(
             r => r.text()
         ).then(
             text => this.ingestData(text,this.state)
@@ -301,6 +304,16 @@ export default class Form extends React.Component {
         console.log(this.state)
     }
 
+    async populateForm() {
+        // let res = await fetch('./Extensions/' + this.state.selectedNtFle);
+        let res = await fetch('./CUP.nt');
+        let text = await res.text();
+        let arr = [];
+        console.log(text);
+        
+    }
+
+
     render() {
        
         return (
@@ -337,8 +350,9 @@ export default class Form extends React.Component {
                     <br/><br/>
                     <b>Enter Data into the form.</b>
                     <br/><br/>
-                    <div>
-                        <label>First Name:<input id = "firstName" name="firstName" type='text' onChange={this.handleChange} /></label>
+                    <div id='formStuff'>
+                        {this.populateForm()}
+                        {/* <label>First Name:<input id = "firstName" name="firstName" type='text' onChange={this.handleChange} /></label>
                         <label>Last Name:<input id = "lastName" name="lastName" type='text' onChange={this.handleChange} /></label>
                         <label>Address:<input id = "address" name='address' type='text' onChange={this.handleChange} /></label>
                         <label>City:<input id = "city" name='city' type='text' onChange={this.handleChange} /></label>
@@ -347,7 +361,7 @@ export default class Form extends React.Component {
                         <label>Zipcode:<input id = "zipcode" name='zipcode' type='text' onChange={this.handleChange} /></label>
                         <label>Email Address:<input id = "email" name="email" type='text' onChange={this.handleChange} /></label>
                         <label>Phone Number:<input id = "phoneNumber" name="phoneNumber" type='text' onChange={this.handleChange} /></label>
-                        <label>Date of Birth:<input id = "birthday" name="birthday" type='text' onChange={this.handleChange} /></label>
+                        <label>Date of Birth:<input id = "birthday" name="birthday" type='text' onChange={this.handleChange} /></label> */}
                     </div>
                 
                     <br/><br/>
