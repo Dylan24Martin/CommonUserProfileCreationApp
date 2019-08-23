@@ -1,15 +1,11 @@
 //Define variables required for loading triples to Solid Pod 
 const $rdf = require("rdflib");
-const store = $rdf.graph();
-var updater = new $rdf.UpdateManager(store);
-var fetcher = new $rdf.Fetcher(store);
 var me;
 var profile;
 //Holds the final sorted array
 var orderedArray = [];
 //Put your solid address here
 var solidAddress;
-
 //specifies what the root node is of the .nt file being read 
 //This is needed since the alogorithm requires knowing where to begin
 var rootFileNode;
@@ -17,26 +13,24 @@ var regExp1 = new RegExp(/_:\w\w\w_/);
 var regExp2 = new RegExp(/:\w\w\w_/);
 var matchRegExp = "";
 
-const personLink = ``
-
-async function fillOrderedArray(){
+async function fillOrderedArray(store, fetcher) {
     orderedArray.length = 0;
     me = store.sym(solidAddress);
     profile = me.doc();
     await fetcher.load(profile);
-    orderedArray = store.toString().split('\n'); 
+    orderedArray = store.toString().split('\n');
 }
 
 
-export async function replaceTriple(oldTripleURL, newTripleURL){
+export async function replaceTriple(oldTripleURL, newTripleURL) {
     orderedArray.length = 0;
-    
+    var store = $rdf.graph();
+    var updater = new $rdf.UpdateManager(store);
+    var fetcher = new $rdf.Fetcher(store);
+
     var oldSplit = oldTripleURL.split(">");
     var newSplit = newTripleURL.split(">");
-    
-    console.log(oldSplit);
-    console.log(newSplit);
-    console.log(oldSplit[0].substring(1, oldSplit[0].length));
+
     me = store.sym(oldSplit[0].substring(1, oldSplit[0].length));
     profile = me.doc();
     await fetcher.load(profile);
@@ -45,102 +39,140 @@ export async function replaceTriple(oldTripleURL, newTripleURL){
 
     var newPred = newSplit[1].substring(2, newSplit[1].length);
     var newObj = newSplit[2].substring(1, newSplit[2].length - 2);
-    console.log("oldPred: " + oldPred);
-    console.log("oldObj: " + oldObj);
 
-    console.log("newPred: " + newPred);
-    console.log("newObj: " + newObj);
-    
     var currentstatements = store.match(me, store.sym(oldPred), oldObj, profile);
-    
+
     store.add(me, store.sym(newPred), newObj, profile);
 
     var insertstatements = store.match(me, store.sym(newPred), newObj, profile);
 
-    new Promise((accept, reject) => updater.update(currentstatements, insertstatements,
+    await new Promise((accept, reject) => updater.update(currentstatements, insertstatements,
         (uri, ok, message) => {
-
             if (ok)
                 accept();
             else
                 reject(message);
-        }));
+        })
+    );
 }
 
-export async function deleteTriples(){
-    await fillOrderedArray();
+export async function deleteTriples(endpoint, triples, rootFileNode) {
+    solidAddress = endpoint;
+    orderedArray = [];
+    // create a new store
+    var store = $rdf.graph();
+    var updater = new $rdf.UpdateManager(store);
+    var fetcher = new $rdf.Fetcher(store);
+    parseNTFile(triples, rootFileNode);
+    prependSolidNoUpload(orderedArray, store);
+    // parse and prepend triples
+    let triplesArr = orderedArray.slice(0);
+    triplesArr = addQuotes(triplesArr);
+    // adds store to ordered array
+    await fillOrderedArray(store, fetcher);
 
-    for(var i = 0; i < orderedArray.length; i++){
-        var insertstatements = [];
-        var tempArr = orderedArray[i].split(" ");
-        fetcher.load(store.sym(tempArr[0].substring(1, tempArr[0].length - 1)));
+    var insertstatements = [];
+    var currentstatements = [];
+    var finalStatements = [];
+    // itterates through the store and the triples to be deleted and compares the two. If the triple to delete matches one in the store then remove the triple from the store
+    for (var x = 0; x < triplesArr.length; x++) {
 
-        me = store.sym(tempArr[0].substring(1, tempArr[0].length - 1));
-        
-        profile = me.doc();
+        for (var i = 0; i < orderedArray.length; i++) {
+            // checks to see if triple to delete is the same as triple in the store ish
+            if (triplesArr[x].includes(orderedArray[i])) {
 
-        var currentstatements = store.match(null, null, null, profile);
+                var tempArr = orderedArray[i].split(" ");
+                fetcher.load(store.sym(tempArr[0].substring(1, tempArr[0].length - 1)));
 
-        new Promise((accept, reject) => updater.update(currentstatements, insertstatements,
+                me = store.sym(tempArr[0].substring(1, tempArr[0].length - 1));
+
+                profile = me.doc();
+                // replace all the things i need to get rid of
+
+                currentstatements = store.match(store.sym(triplesArr[x].split(' ')[0].replace('<', '').replace('>', '')), store.sym(triplesArr[x].split(' ')[1].replace('<', '').replace('>', '')), null, profile);
+
+                // continue;
+                for (let k = 0; k < currentstatements.length; k++) {
+                    finalStatements.push(currentstatements[k])
+                }
+
+            }
+        }
+    }
+
+
+    try {
+        await new Promise((accept, reject) => updater.update(finalStatements, insertstatements,
             (uri, ok, message) => {
-
                 if (ok)
                     accept();
-                else
+                else {
+                    console.log("Unable to delete " + currentstatements);
                     reject(message);
+                }
             }));
+    } catch{
+        console.log("Unable to delete " + currentstatements);
     }
 }
 
 
-function prependSolid(orderedArray) {
+function addQuotes(arr) {
+    let newArr = []
+
+    for (let p = 0; p < arr.length; p++) {
+        let line = arr[p];
+        if (line.split(" ")[1].includes('value')) {
+
+            let value = '';
+            for (let n = 2; n < line.split(' ').length - 1; n++) {
+                value += line.split(' ')[n] + ' ';
+            }
+            value = value.substr(0, value.length - 1);
+
+            let newval = '"' + value + '"';
+
+            newArr.push(line.replace(value, newval))
+        }
+        else {
+            newArr.push(line);
+        }
+    }
+
+    return newArr;
+}
+
+
+async function prependSolid(orderedArray, store, updater) {
+    var insertstatements = [];
+    var finalStatements = [];
 
     for (var i = 0; i < orderedArray.length; i++) {
         //If it designating a child node
-        // console.log(orderedArray[i]);
         var arrTest = orderedArray[i].split(" ");
-        if (orderedArray[i].split("<").length === 2) {
+        if (orderedArray[i].split("<").length == 2) {
 
             if (regExp1.test(arrTest[2])) {
-                console.log('smac?')
                 var tempArr = orderedArray[i].split(" ");
-                
                 //prepend to subject node
                 tempArr[0] = tempArr[0].substring(6, tempArr[0].length);
                 tempArr[0] = "<" + solidAddress + tempArr[0] + ">";
-
                 //prepend to object node
                 tempArr[2] = tempArr[2].substring(6, tempArr[2].length);
                 tempArr[2] = "<" + solidAddress + tempArr[2] + ">";
 
                 //upload to solid pod
-                me = store.sym(tempArr[0].substring(1, tempArr[0].length - 1).replace('Person1',""));
+                me = store.sym(tempArr[0].substring(1, tempArr[0].length - 1).replace('Person1', ""));
                 profile = me.doc();
-                console.log(me);
-                var currentstatements = store.match(null, null, null, profile);
-            
-                store.add(me, store.sym(tempArr[1].substring(1, tempArr[1].length - 1)), store.sym(tempArr[2].substring(1, tempArr[2].length - 1).replace('Person1',"")), profile);
-                
-                var insertstatements = store.match(null, null, null, profile);
-                
-                new Promise((accept, reject) => updater.update(currentstatements, insertstatements,
-                    (ok, message) => {
 
-                        if (ok) accept();
-                        else reject(message);
-                    }));
-                
+                store.add(me, store.sym(tempArr[1].substring(1, tempArr[1].length - 1)), store.sym(tempArr[2].substring(1, tempArr[2].length - 1)), profile);
+
                 orderedArray[i] = tempArr.join(" ");
-                console.log(orderedArray[i])
             }
-
             else {
-                console.log('sub')
                 //prepend to subject node, leave object alone since it contains a value (like "DOE")
-
                 var tempArr = orderedArray[i].split(" ");
                 //Checks if the value has spaces and accounts for this
-
                 if (tempArr.length > 4) {
                     var len = tempArr.length - 1;
                     for (var j = 3; j < len; j++) {
@@ -149,63 +181,33 @@ function prependSolid(orderedArray) {
 
                     tempArr[0] = tempArr[0].substring(6, tempArr[0].length);
                     tempArr[0] = "<" + solidAddress + tempArr[0] + ">";
-                    tempArr[2] = tempArr[2].substring(1, tempArr[2].length - 1);                   
+                    tempArr[2] = tempArr[2].substring(1, tempArr[2].length - 1);
 
                     //upload to solid pod
-                    me = store.sym(tempArr[0].substring(1, tempArr[0].length - 1).replace('Person1',""));
+                    me = store.sym(tempArr[0].substring(1, tempArr[0].length - 1));
                     profile = me.doc();
 
-                    var currentstatements = store.match(null, null, null, profile);
                     store.add(me, store.sym(tempArr[1].substring(1, tempArr[1].length - 1)), tempArr[2].substring(0, tempArr[2].length), profile);
-                    var insertstatements = store.match(null, null, null, profile);
-                    console.log(tempArr[1].substring(1, tempArr[1].length - 1));
-                    console.log(tempArr[2].substring(0, tempArr[2].length));
-
-                    new Promise((accept, reject) => updater.update(currentstatements, insertstatements,
-                        (uri, ok, message) => {
-
-                            if (ok)
-                                accept();
-                            else
-                                reject(message);
-                        }));
 
                     orderedArray[i] = tempArr[0] + " " + tempArr[1] + " " + tempArr[2];
-                    console.log(orderedArray[i])
                 }
                 else {
-                    console.log('that other else')
-
                     tempArr[0] = tempArr[0].substring(6, tempArr[0].length);
                     tempArr[0] = "<" + solidAddress + tempArr[0] + ">";
                     tempArr[2] = tempArr[2].substring(1, tempArr[2].length - 1);
 
                     //upload to solid pod
-                    me = store.sym(tempArr[0].substring(1, tempArr[0].length - 1).replace('Person1',""));
+                    me = store.sym(tempArr[0].substring(1, tempArr[0].length - 1).replace('Person1', ""));
                     profile = me.doc();
 
-                    var currentstatements = store.match(null, null, null, profile);
                     store.add(me, store.sym(tempArr[1].substring(1, tempArr[1].length - 1)), tempArr[2].substring(0, tempArr[2].length), profile);
-                    var insertstatements = store.match(null, null, null, profile);
-                    
-                    new Promise((accept, reject) => updater.update(currentstatements, insertstatements,
-                        (uri, ok, message) => {
-
-                            if (ok)
-                                accept();
-                            else
-                                reject(message);
-                        }));
 
                     orderedArray[i] = tempArr.join(" ");
-                    console.log(orderedArray[i])
                 }
             }
         }
-
         //Else it is a node definition
         else {
-            console.log('def')
             var tempArr = orderedArray[i].split(" ");
             tempArr[0] = tempArr[0].substring(6, tempArr[0].length);
 
@@ -213,24 +215,109 @@ function prependSolid(orderedArray) {
             tempArr[0] = "<" + solidAddress + tempArr[0] + ">";
 
             //upload to solid pod
-            me = store.sym(tempArr[0].substring(1, tempArr[0].length - 1).replace('Person1',""));
+            me = store.sym(tempArr[0].substring(1, tempArr[0].length - 1).replace('Person1', ""));
             profile = me.doc();
 
-            var currentstatements = store.match(null, null, null, profile);
-            store.add(me, store.sym(tempArr[1].substring(1, tempArr[1].length - 1)), store.sym(tempArr[2].substring(1, tempArr[2].length - 1).replace('Person1',"")), profile);
-            var insertstatements = store.match(null, null, null, profile);
-            
-            new Promise((accept, reject) => updater.update(currentstatements, insertstatements,
-                (uri, ok, message) => {
-
-                    if (ok)
-                        accept();
-                    else
-                        reject(message);
-                }));
+            store.add(me, store.sym(tempArr[1].substring(1, tempArr[1].length - 1)), store.sym(tempArr[2].substring(1, tempArr[2].length - 1)), profile);
 
             orderedArray[i] = tempArr.join(" ");
-            console.log(orderedArray[i])
+        }
+    }
+
+    insertstatements = store.match(null, null, null, profile);
+
+    for (let k = 0; k < insertstatements.length; k++) {
+        finalStatements.push(insertstatements[k])
+    }
+    await new Promise((accept, reject) => updater.update([], finalStatements,
+        (uri, ok, message) => {
+            if (ok)
+                accept();
+            else
+                reject(message);
+        }));
+}
+
+
+async function prependSolidNoUpload(orderedArray, store) {
+    for (var i = 0; i < orderedArray.length; i++) {
+        //If it designating a child node
+        var arrTest = orderedArray[i].split(" ");
+        if (orderedArray[i].split("<").length == 2) {
+
+            if (regExp1.test(arrTest[2])) {
+                var tempArr = orderedArray[i].split(" ");
+                //prepend to subject node
+                tempArr[0] = tempArr[0].substring(6, tempArr[0].length);
+                tempArr[0] = "<" + solidAddress + tempArr[0] + ">";
+                //prepend to object node
+                tempArr[2] = tempArr[2].substring(6, tempArr[2].length);
+                tempArr[2] = "<" + solidAddress + tempArr[2] + ">";
+
+                //upload to solid pod
+                // me = store.sym(tempArr[0].substring(1, tempArr[0].length - 1));
+                // profile = me.doc();
+                // var currentstatements = store.match(null, null, null, profile);
+                // store.add(me, store.sym(tempArr[1].substring(1, tempArr[1].length - 1)), store.sym(tempArr[2].substring(1, tempArr[2].length - 1)), profile);
+                // var insertstatements = store.match(null, null, null, profile);
+                orderedArray[i] = tempArr.join(" ");
+            }
+            else {
+                //prepend to subject node, leave object alone since it contains a value (like "DOE")
+                var tempArr = orderedArray[i].split(" ");
+
+                //Checks if the value has spaces and accounts for this
+                if (tempArr.length > 4) {
+                    var len = tempArr.length - 1;
+                    for (var j = 3; j < len; j++) {
+                        tempArr[2] = tempArr[2] + " " + tempArr[j];
+                    }
+
+                    tempArr[0] = tempArr[0].substring(6, tempArr[0].length);
+                    tempArr[0] = "<" + solidAddress + tempArr[0] + ">";
+                    tempArr[2] = tempArr[2].substring(1, tempArr[2].length - 1);
+
+                    //upload to solid pod
+                    // me = store.sym(tempArr[0].substring(1, tempArr[0].length - 1));
+                    // profile = me.doc();
+                    // var currentstatements = store.match(null, null, null, profile);
+                    // store.add(me, store.sym(tempArr[1].substring(1, tempArr[1].length - 1)), tempArr[2].substring(0, tempArr[2].length), profile);
+                    // var insertstatements = store.match(null, null, null, profile);
+
+                    orderedArray[i] = tempArr[0] + " " + tempArr[1] + " " + tempArr[2] + ' .';
+                }
+                else {
+                    tempArr[0] = tempArr[0].substring(6, tempArr[0].length);
+                    tempArr[0] = "<" + solidAddress + tempArr[0] + ">";
+                    tempArr[2] = tempArr[2].substring(1, tempArr[2].length - 1);
+
+                    //upload to solid pod
+                    // me = store.sym(tempArr[0].substring(1, tempArr[0].length - 1));
+                    // profile = me.doc();
+
+                    // var currentstatements = store.match(null, null, null, profile);
+                    // store.add(me, store.sym(tempArr[1].substring(1, tempArr[1].length - 1)), tempArr[2].substring(0, tempArr[2].length), profile);
+                    // var insertstatements = store.match(null, null, null, profile);
+                    orderedArray[i] = tempArr.join(" ");
+                }
+            }
+        }
+        //Else it is a node definition
+        else {
+            var tempArr = orderedArray[i].split(" ");
+            tempArr[0] = tempArr[0].substring(6, tempArr[0].length);
+
+            //prepend to subject node
+            tempArr[0] = "<" + solidAddress + tempArr[0] + ">";
+
+            //upload to solid pod
+            // me = store.sym(tempArr[0].substring(1, tempArr[0].length - 1));
+            // profile = me.doc();
+
+            // var currentstatements = store.match(null, null, null, profile);
+            // store.add(me, store.sym(tempArr[1].substring(1, tempArr[1].length - 1)), store.sym(tempArr[2].substring(1, tempArr[2].length - 1)), profile);
+            // var insertstatements = store.match(null, null, null, profile);
+            orderedArray[i] = tempArr.join(" ");
         }
     }
 }
@@ -246,27 +333,29 @@ function parseBranches(branches, initialFile, parents) {
         var newBranches = [];
         var branchNode = branches[i].split(regExp2);
         //Array holds subject to be extracted and kept track of along the recursive function
-    
+        var previousBranches = [];
         var subject = branches[i].split(" ");
-
         if (!parents.includes(subject[0].substring(6, subject[0].length))) {
             parents.push(subject[0].substring(6, subject[0].length));
+
         }
         //parents.push(subject[0].substring(6,subject[0].length));
+
 
         if (branchNode.length == 3) {
             for (var j = 0; j < initialFile.length; j++) {
                 //We must perform two splits to isolate the subject value so we can match our branches object with the
                 //corresponding object
-                if( initialFile[j].length == 0){
+                if (initialFile[j].length == 0) {
                     continue;
                 }
                 var split1 = initialFile[j].split(regExp1);
                 var split2 = split1[1].split(" ");
 
+
                 if (split2[0].toLowerCase() == branchNode[2].toLowerCase().substring(0, branchNode[2].length - 2) && initialFile[j] != branches[i]) {
                     if (initialFile[j].split("<").length == 2 && initialFile[j].split(regExp1).length == 3) {
-                        
+
                         //
                         // TODO: Remove IBE GUIDs 
                         //
@@ -280,17 +369,19 @@ function parseBranches(branches, initialFile, parents) {
                         insertParent[2] = tempParentString + "/" + getChildString[0] + "/" + insertParent[2];
                         insertParent = insertParent.join(matchRegExp[0]);
 
+
+
                         //This is the node that defines its children are, this is tracked by newBranches
                         newBranches.push(initialFile[j]);
 
                         orderedArray.push(insertParent);
+
                     }
                     else if (initialFile[j].split("<").length == 2 && initialFile[j].split(regExp1).length == 2) {
 
                         //
                         // TODO: Remove IBE GUIDs 
                         //
-
                         var tempParentString = parents.join("/");
 
                         var insertParent = initialFile[j].split(regExp1);
@@ -314,34 +405,35 @@ function parseBranches(branches, initialFile, parents) {
 
                         insertParent[1] = tempParentString + "/" + insertParent[1];
                         insertParent = insertParent.join(matchRegExp[0]);
-
                         //This is the type identifier node, this can be immediately added to ordered array
                         orderedArray.push(insertParent);
                     }
                 }
+
             }
         }
         //Base case for recursive function, it means the recursion has reached the end node of the branch
         if (newBranches.length == 0) {
             //END OF RECURSION, nothing else needed to do
-            console.log(parents);
         }
 
         else {
             //Else you haven't hit the end, keep going!
             parseBranches(newBranches.slice(), initialFile, parents.slice(0));
-
         }
     }
 }
 
+
+
 function parseNTFile(fileString, rootNode) {
-    
+
     console.log("Parsing given .nt file...");
 
     //split file on new lines
     var fileArray = fileString.split(/\r?\n/);
     var fileLineNum = fileArray.length;
+
 
     var countRoot = 0;
     //Holds all triples that contain the root keyword (such as "person")
@@ -351,9 +443,11 @@ function parseNTFile(fileString, rootNode) {
     //holds the branches that are to be created off the initial root node
     var rootBranches = [];
 
+
+
+
     console.log("Given file is " + fileArray.length + " lines long");
     //find and counts all root
-
     for (var i = 0; i < fileLineNum; i++) {
         if (fileArray[i].toLowerCase().includes(rootNode)) {
             countRoot++;
@@ -371,6 +465,7 @@ function parseNTFile(fileString, rootNode) {
 
             orderedArray.push(rootTriple);
 
+
         }
         //Finds a branch off of the root node
         else {
@@ -386,35 +481,42 @@ function parseNTFile(fileString, rootNode) {
         //'person a person/propername' messes up the recursive function based on how I am doing it currently
         var temp = rootBranches[i].split(regExp1);
         matchRegExp = regExp1.exec(rootBranches[i]);
-        // console.log(rootBranches[i]);
-        // console.log(matchRegExp);
+
         var subject = temp[1].split(" ");
         temp[2] = subject[0] + "/" + temp[2];
         var tempRootBranches = temp.join(matchRegExp[0]);
 
+
         orderedArray.push(tempRootBranches);
+
+
+
+
     }
 
     //initate recursive function given the initial root node and its children
     parseBranches(rootBranches, fileArray, []);
-    
+
     //Completed ordering, tracked by the array "orderedArray"
     console.log("Done...");
     console.log("The complete parsed .nt file is " + orderedArray.length + " lines long");
-    
-    //Prep for uploading to solid
-    prependSolid(orderedArray);
-    // for(var i = 0; i < orderedArray.length; i++){
-    //     console.log(orderedArray[i]);
-    // }
-    
+
 }
 
 export async function run(file, rootNode, endpoint) {
-    solidAddress = endpoint;
-    rootFileNode = rootNode;
-    orderedArray.length = 0;
-    parseNTFile(file, rootFileNode);
+    console.log(file);
+    return new Promise(
+        async (resolve, reject) => {
+            var store = $rdf.graph();
+            var updater = new $rdf.UpdateManager(store);
+            var fetcher = new $rdf.Fetcher(store);
+            solidAddress = endpoint;
+            rootFileNode = rootNode;
+            orderedArray.length = 0;
+            parseNTFile(file, rootFileNode);
+            prependSolid(orderedArray, store, updater);
+            resolve();
+        }
+    )
 
-    return orderedArray;
 }

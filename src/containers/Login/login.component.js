@@ -28,7 +28,7 @@ export default class LoginComponent extends Component<Props, State> {
     return (
       <LoginWrapper>
         <CenterContainer>
-          <h1>CardX</h1>
+          <h1 style={{fontSize:'200%'}}>CardX Profile Creation App</h1>
           {/* <span>Your Universal Identity</span> */}
           <LoginPanel>
             <PanelBody>
