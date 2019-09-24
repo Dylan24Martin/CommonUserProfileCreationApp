@@ -159,7 +159,7 @@ export default class Form extends React.Component {
         ).then(
             text => {
                 text += ("\n" + dataFromUserNT);
-                run(text, 'person', CUPurl)
+                run(text, 'me', CUPurl.split("#")[0]+'#')
             }
         )
     }
