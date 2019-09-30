@@ -3,8 +3,6 @@ import './form.css';
 import { run } from '../../parse.js';
 import auth from "solid-auth-client";
 import data from "@solid/query-ldflex";
-
-
 var CUPurl;
 const $rdf = require("rdflib");
 const store = $rdf.graph();
@@ -31,7 +29,7 @@ export default class Form extends React.Component {
     async componentDidMount() {
         let res = await fetch('./Extensions/extension.json');
         let files = await res.json();
-        await this.setState({files:files.extensions});
+        await this.setState({ files: files.extensions });
         // <a onClick={() => this.populateForm()} href="#">Favorite Food</a>
         for (let x = 0; x < files.extensions.length; x++) {
             let item = document.createElement('a');
@@ -41,67 +39,67 @@ export default class Form extends React.Component {
                 });
                 this.populateForm();
             }
-            item.innerHTML = files.extensions[x].replace('.nt','');
+            item.innerHTML = files.extensions[x].replace('.nt', '');
             document.getElementById('dropdown-content').appendChild(item);
         }
     }
 
     async addressToCords() {
         return new Promise(
-          async (resolve, reject) => {
-            let res = await fetch(`http://www.mapquestapi.com/geocoding/v1/address?key=${apiKey}&location=${this.state.addrVal.replace(/ /g, '+')},${this.state.cityVal},${this.state.stateVal}`);
-            let json = await res.json();
-            let lat = json.results[0].locations[0].latLng.lat;
-            let lng = json.results[0].locations[0].latLng.lng;   
-            resolve({ lat: lat, lng: lng });
-          }
+            async (resolve, reject) => {
+                let res = await fetch(`http://www.mapquestapi.com/geocoding/v1/address?key=${apiKey}&location=${this.state.addrVal.replace(/ /g, '+')},${this.state.cityVal},${this.state.stateVal}`);
+                let json = await res.json();
+                let lat = json.results[0].locations[0].latLng.lat;
+                let lng = json.results[0].locations[0].latLng.lng;
+                resolve({ lat: lat, lng: lng });
+            }
         )
-    
-      }
+
+    }
 
     async ingestData(template, data) {
         let ingestedData = '';
         let lines = template.split('\n');
-        for( let c = 0; c < lines.length; c++){
+        for (let c = 0; c < lines.length; c++) {
             let line = lines[c];
-            let value = line.split(' ')[2].replace(/"/g,"");
+            let value = line.split(' ')[2].replace(/"/g, "");
             let inputs = document.getElementsByClassName('input');
-            for(let i = 0; i < inputs.length; i++){
+            for (let i = 0; i < inputs.length; i++) {
                 // handle lat and long
                 if ((line.split(' ')[0].includes('LongitudeBearingEntity') || line.split(' ')[0].includes('LatitudeBearingEntity')) && line.split(' ')[2].startsWith('"')) {
                     console.log('here')
-                    for (let x = 0; x < inputs.length; x++){
-                        if(inputs[x].id.toLowerCase().includes('city')){
-                            await this.setState({cityVal:inputs[x].value})
+                    for (let x = 0; x < inputs.length; x++) {
+                        if (inputs[x].id.toLowerCase().includes('city')) {
+                            await this.setState({ cityVal: inputs[x].value })
                         }
-                        else if (inputs[x].id.toLowerCase().includes('state')){
-                            await this.setState({stateVal:inputs[x].value})
+                        else if (inputs[x].id.toLowerCase().includes('state')) {
+                            await this.setState({ stateVal: inputs[x].value })
                         }
-                        else if (inputs[x].id.toLowerCase().includes('address')){
-                            await this.setState({addrVal:inputs[x].value});
+                        else if (inputs[x].id.toLowerCase().includes('address')) {
+                            await this.setState({ addrVal: inputs[x].value });
                         }
                     }
-                    if(this.state.cityVal && this.state.stateVal && this.state.addrVal) {
+                    if (this.state.cityVal && this.state.stateVal && this.state.addrVal) {
                         console.log('here2')
                         let cords = await this.addressToCords();
                         if (line.split(" ")[0].includes('LongitudeBearingEntity')) {
                             console.log('here3')
-                            line = line.replace(`${value}`,cords.lng)
+                            line = line.replace(`${value}`, cords.lng)
                         }
-                        else if(line.split(" ")[0].includes('LatitudeBearingEntity')) {
+                        else if (line.split(" ")[0].includes('LatitudeBearingEntity')) {
                             console.log('here4')
-                            line = line.replace(`${value}`,cords.lat);
+                            line = line.replace(`${value}`, cords.lat);
                         }
                     }
                 }
-                else if(inputs[i].id === value){
+                else if (inputs[i].id === value) {
                     // handle if the input is supposed to be an object
-                    if(line.split(' ')[1] === "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>"){
+                    if (line.split(' ')[1] === "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>") {
                         let tmp = inputs[i].value
                         let arr = tmp.split(' ');
                         tmp = '';
-                        for(let x = 0; x < arr.length; x++) {
-                            tmp += arr[x].substring(0,1).toUpperCase() + arr[x].substring(1,arr[x].length).toLowerCase();
+                        for (let x = 0; x < arr.length; x++) {
+                            tmp += arr[x].substring(0, 1).toUpperCase() + arr[x].substring(1, arr[x].length).toLowerCase();
                         }
                         line = line.replace(`"${value}"`, `<http://www.ontologyrepository.com/CommonCoreOntologies/${tmp}>`);
                     }
@@ -138,18 +136,18 @@ export default class Form extends React.Component {
                 method: 'PUT', // or 'PUT'
                 body: '' // data can be `string` or {object}!
             }).then(res => { return res; })
-            .catch(error => console.log(error));
+                .catch(error => console.log(error));
         }
         document.getElementById('error').innerHTML = '';
         // make sure all fields in the form are filled out
         let inputs = document.getElementsByClassName('input');
-        for (let x = 0;  x < inputs.length; x++) {
-            if(inputs[x].value === '') {
+        for (let x = 0; x < inputs.length; x++) {
+            if (inputs[x].value === '') {
                 let str = '';
-                for(let x = 0; x < inputs[x].id.split('_').length; x++){
+                for (let x = 0; x < inputs[x].id.split('_').length; x++) {
                     str += inputs[x].id.split('_')[x] + ' ';
                 }
-                document.getElementById('error').innerHTML = `no value found in the ${str.substring(0,str.length-1)} input field. Please fill out all values.`;
+                document.getElementById('error').innerHTML = `no value found in the ${str.substring(0, str.length - 1)} input field. Please fill out all values.`;
             }
         }
         await fetch('./Extensions/' + this.state.selectedNtFle).then(
@@ -159,7 +157,7 @@ export default class Form extends React.Component {
         ).then(
             text => {
                 text += ("\n" + dataFromUserNT);
-                run(text, 'me', CUPurl.split("#")[0]+'#')
+                run(text, 'me', CUPurl.split("#")[0] + '#')
             }
         )
     }
@@ -299,26 +297,37 @@ export default class Form extends React.Component {
         for (let i = 0; i < text.split('\n').length; i++) {
             let line = text.split('\n')[i];
             // determine if line is an input line
-            if (line.split(' ')[0].includes('LongitudeBearingEntity') || line.split(' ')[0].includes('LatitudeBearingEntity')){
+            if (line.split(' ')[0].includes('LongitudeBearingEntity') || line.split(' ')[0].includes('LatitudeBearingEntity')) {
                 continue;
             }
             else if (line.split(' ')[1].includes('/has_text_value') || line.split(' ')[2].startsWith('"')) {
-                let value = line.split(' ')[2].replace(/"/g,'');
+                let value = line.split(' ')[2].replace(/"/g, '');
                 // <label>First Name:<input id = "firstName" name="firstName" type='text' onChange={this.handleChange} /></label>
+                let container = document.createElement('div');
+                container.className = 'inputCell col-12'
                 let label = document.createElement('label');
+                label.className = 'col-3';
                 let input = document.createElement('input');
                 input.id = value;
-                input.className = 'input';
+                input.className = 'input col-7';
                 input.type = 'text';
                 input.onchange = this.handleChange;
                 input.name = value;
+                let checkBox = document.createElement('input');
+                checkBox.type = 'checkbox';
+                checkBox.name = 'private';
+                checkBox.value = 'private';
+                checkBox.className = 'input col-1';
+                checkBox.innerHTML='tesyt';
                 let str = '';
-                for(let x = 0; x < value.split('_').length; x++){
+                for (let x = 0; x < value.split('_').length; x++) {
                     str += value.split('_')[x] + ' ';
                 }
-                label.innerHTML = str.substring(0,str.length-1) + ':';
-                label.appendChild(input);
-                document.getElementById('formStuff').appendChild(label)
+                label.innerHTML = str.substring(0, str.length - 1) + ':';
+                container.appendChild(label)
+                container.appendChild(input);
+                container.appendChild(checkBox);
+                document.getElementById('formStuff').appendChild(container)
             }
         }
     }
@@ -326,7 +335,7 @@ export default class Form extends React.Component {
 
     render() {
         return (
-            <div className='mainDiv'>
+            <div className='mainDiv container'>
                 <div style={{ display: 'flex', flexDirection: 'row' }}>
                     <div style={{ width: '50%' }}>
                         <div id="card-upload-area">
@@ -359,20 +368,13 @@ export default class Form extends React.Component {
                         </div>
                     </div>
                 </div>
-                <form onSubmit={this.handleSubmit}>
-                    
-                    <div id='formStuff'>
-                        {/* Add that form stuff here */}
-                    </div>
-
-                    <br /><br />
-
-                    <div>
-                        <input className='submitButton' type='submit'></input>
-                    </div>
-
-                </form>
-
+                <div id='formStuff'>
+                    {/* Add that form stuff here */}
+                </div>
+                <br /><br />
+                <div>
+                    <input onClick={this.handleSubmit} className='submitButton' type='submit'></input>
+                </div>
                 <div>
                     <label id='error'></label>
                 </div>

@@ -60,6 +60,7 @@
     "rdflib": "^0.19.1",
     "react": "^16.8.6",
     "react-app-polyfill": "^0.2.2",
+    "react-bootstrap": "^1.0.0-beta.12",
     "react-calendar": "^2.19.0",
     "react-click-outside": "^3.0.1",
     "react-datetime": "^2.16.3",
