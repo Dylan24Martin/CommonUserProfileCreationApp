@@ -1,0 +1,7 @@
+{
+    "extensions":[
+        "CardX.nt",
+        "OccupationExtension.nt",
+        "AutomobileExtension.nt"
+    ]
+}

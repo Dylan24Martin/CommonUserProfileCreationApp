@@ -234,4 +234,3 @@ _:cco_LocalAdministrativeRegion2 <http://www.ontologyrepository.com/CommonCoreOn
 _:cco_ActOfOwnership1 <http://www.ontologyrepository.com/CommonCoreOntologies/has_object> _:cco_Telephone1 .
 _:cco_ActOfManufacturing1 <http://www.ontologyrepository.com/CommonCoreOntologies/has_output> _:cco_Automobile1 .
 _:cco_EmailBox1 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.ontologyrepository.com/CommonCoreOntologies/EmailBox> .
-
